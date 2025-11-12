@@ -1,10 +1,11 @@
 # Preparacion e instalación
-git clone <https://github.com/mateoJk/efi_segundo_semestre>
-cd <efi_segundo_semestre>
-python -m venv env
-source env/bin/activate  # Linux/Mac
-.\env\Scripts\Activate.ps1  # Windows PowerShell
-pip install -r requirements.txt
+git clone <https://github.com/mateoJk/efi_segundo_semestre>  
+cd <efi_segundo_semestre>  
+python -m venv env  
+source env/bin/activate  # Linux/Mac  
+.\env\Scripts\Activate.ps1  # Windows PowerShell  
+pip install -r requirements.txt  
+
 
 # Cómo ejecutar la app
 flask run
@@ -58,9 +59,10 @@ GET /api/stats                 # Moderator y admin
 
 
 # Credenciales de Prueba
-admin: "email": "admin1@test.com" / "password": "123456"
-#
-moderator: "email": "user1@test.com" / "password": "123456"
-#
-user: "email": "user2@test.com" / "password": "123455"
+admin: "email": "admin1@test.com" / "password": "123456"  
+moderator: "email": "user1@test.com" / "password": "123456"  
+user: "email": "user2@test.com" / "password": "123455"  
+
+
+
 
