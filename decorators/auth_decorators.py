@@ -14,7 +14,7 @@ def roles_required(*roles):
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
-            # Verifica token válido
+            # Verifica token valido
             verify_jwt_in_request()
             claims = get_jwt()
             user_role = claims.get("role", "user")  # fallback 'user' si no viene
@@ -22,7 +22,7 @@ def roles_required(*roles):
             if user_role not in roles:
                 return jsonify({
                     "error": "Acceso denegado",
-                    "message": f"Se requiere uno de los roles: {roles}"
+                    "message": f"Tu rol actual es '{user_role}'. Se requiere uno de: {roles}"
                 }), 403
 
             return fn(*args, **kwargs)
@@ -32,7 +32,7 @@ def roles_required(*roles):
 
 def active_user_required(fn):
     """
-    Decorador que verifica que el usuario (según claims) esté activo.
+    Decorador que verifica que el usuario (segun claims) este activo.
     Requiere que el token incluya 'is_active' en los claims o que la vista
     valide la condición consultando la BD.
     """
@@ -41,7 +41,6 @@ def active_user_required(fn):
         verify_jwt_in_request()
         claims = get_jwt()
 
-        # Si no incluiste is_active en los claims, podés dejar True por defecto
         is_active = claims.get("is_active", True)
         if not is_active:
             return jsonify({
@@ -62,7 +61,7 @@ def check_ownership_or_role(resource_owner_id):
         if not check_ownership_or_role(post.usuario_id):
             return jsonify({"error": "No tienes permiso"}), 403
     """
-    # identity: id que pasaste al crear el token (create_access_token(identity=...))
+    # identity: id que pasaste al crear el token (create_access_token(identity=..))
     user_id = get_jwt_identity()
     claims = get_jwt()
     user_role = claims.get("role")
@@ -70,4 +69,4 @@ def check_ownership_or_role(resource_owner_id):
     if user_role == "admin":
         return True
 
-    return user_id == resource_owner_id
+    return int(user_id) == resource_owner_id

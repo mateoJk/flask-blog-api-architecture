@@ -13,7 +13,7 @@ class PostCreateSchema(Schema):
         validate=validate.Length(min=10),
         error_messages={"required": "El contenido es obligatorio"}
     )
-    is_published = fields.Bool(missing=True)
+    is_published = fields.Bool(load_default=True)
 
 
 class PostUpdateSchema(Schema):
@@ -33,6 +33,7 @@ class PostSchema(Schema):
     fecha_actualizacion = fields.DateTime()
     usuario_id = fields.Int()
     autor_username = fields.Method("get_autor_username")
+    categorias = fields.List(fields.Str(attribute="nombre"))
 
     def get_autor_username(self, obj):
         """Devuelve el nombre del autor asociado al post"""

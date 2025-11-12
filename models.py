@@ -40,7 +40,7 @@ class UserCredentials(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default="user")
+    role = db.Column(db.String(20), default="user") 
 
     def set_password(self, password):
         """Guarda la contraseña encriptada"""
@@ -94,7 +94,15 @@ class Comentario(db.Model):
     def __repr__(self):
         return f'<Comentario {self.id}>'
 
-
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "contenido": self.contenido,
+            "usuario_id": self.usuario_id,
+            "post_id": self.post_id,
+            "fecha_creacion": self.fecha_creacion.isoformat()
+        }
+    
 # Categoria
 class Categoria(db.Model):
     __tablename__ = 'categoria'

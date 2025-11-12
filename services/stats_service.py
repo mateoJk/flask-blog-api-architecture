@@ -11,7 +11,7 @@ class StatsService:
         self.comment_repo = CommentRepository()
         self.category_repo = CategoryRepository()
 
-    def get_stats(self) -> dict:
+    def get_stats(self):
         """
         Devuelve estadísticas generales:
         - total_posts

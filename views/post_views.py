@@ -3,7 +3,9 @@ from flask.views import MethodView
 
 from services.post_service import PostService
 from schemas.post_schemas import PostCreateSchema, PostUpdateSchema, PostSchema
-from decorators.auth_decorators import roles_required, active_user_required
+from decorators.auth_decorators import roles_required, active_user_required, check_ownership_or_role
+
+from flask_jwt_extended import get_jwt_identity
 
 post_service = PostService()
 
@@ -27,6 +29,10 @@ class PostsAPI(MethodView):
             valid_data = schema.load(data)
         except Exception as err:
             return jsonify({"error": "Datos inválidos", "details": str(err)}), 400
+        
+        # Obtener el usuario actual desde JWT
+        usuario_id = get_jwt_identity()
+        valid_data["usuario_id"] = usuario_id  # agregar al diccionario
 
         nuevo_post = post_service.create_post(valid_data)
         return jsonify(PostSchema().dump(nuevo_post)), 201
@@ -42,6 +48,7 @@ class PostDetailAPI(MethodView):
             return jsonify({"error": "Post no encontrado"}), 404
         return jsonify(PostSchema().dump(post)), 200
 
+
     @roles_required("user", "moderator", "admin")
     @active_user_required
     def put(self, post_id):
@@ -50,6 +57,10 @@ class PostDetailAPI(MethodView):
         if not post:
             return jsonify({"error": "Post no encontrado"}), 404
 
+        # Verificar que el usuario sea el autor o admin
+        if not check_ownership_or_role(post.usuario_id):
+            return jsonify({"error": "No tienes permiso para actualizar este post."}), 403
+
         data = request.get_json()
         schema = PostUpdateSchema()
         try:
@@ -57,13 +68,10 @@ class PostDetailAPI(MethodView):
         except Exception as err:
             return jsonify({"error": "Datos inválidos", "details": str(err)}), 400
 
-        try:
-            actualizado = post_service.update_post(post, valid_data)
-        except PermissionError as e:
-            return jsonify({"error": str(e)}), 403
-
+        actualizado = post_service.update_post(post, valid_data)
         return jsonify(PostSchema().dump(actualizado)), 200
 
+    #delete
     @roles_required("user", "moderator", "admin")
     @active_user_required
     def delete(self, post_id):
@@ -72,9 +80,9 @@ class PostDetailAPI(MethodView):
         if not post:
             return jsonify({"error": "Post no encontrado"}), 404
 
-        try:
-            post_service.delete_post(post)
-        except PermissionError as e:
-            return jsonify({"error": str(e)}), 403
+        # Verificar que el usuario sea el autor o admin
+        if not check_ownership_or_role(post.usuario_id):
+            return jsonify({"error": "No tienes permiso para eliminar este post."}), 403
 
+        post_service.delete_post(post)
         return jsonify({"message": "Post eliminado correctamente"}), 200

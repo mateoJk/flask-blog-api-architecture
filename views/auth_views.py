@@ -66,7 +66,7 @@ class AuthLoginView(MethodView):
             return jsonify({"error": "Usuario inactivo"}), 403
 
         # Crear token JWT con claims personalizados
-        access_token = create_access_token(identity=usuario.id, additional_claims={
+        access_token = create_access_token(identity=str(usuario.id), additional_claims={
             "username": usuario.username,
             "email": usuario.email,
             "role": usuario.credenciales.role,

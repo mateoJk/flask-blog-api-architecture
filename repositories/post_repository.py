@@ -9,7 +9,7 @@ class PostRepository:
     """Repository para operaciones CRUD sobre Post."""
 
     @staticmethod
-    def get_all(published_only: bool = True, order_desc: bool = True) -> List[Post]:
+    def get_all(published_only: bool = True, order_desc: bool = True):
         """
         Devuelve todos los posts.
         - published_only: si True devuelve solo posts con is_published=True.
@@ -25,12 +25,12 @@ class PostRepository:
         return query.all()
 
     @staticmethod
-    def get_by_id(post_id: int) -> Optional[Post]:
+    def get_by_id(post_id: int):
         """Devuelve un Post por su id o None si no existe."""
         return Post.query.get(post_id)
 
     @staticmethod
-    def get_by_user(user_id: int, published_only: bool = False) -> List[Post]:
+    def get_by_user(user_id: int, published_only: bool = False):
         """Devuelve posts escritos por un usuario."""
         query = Post.query.filter_by(usuario_id=user_id)
         if published_only:
@@ -38,7 +38,7 @@ class PostRepository:
         return query.order_by(Post.fecha_creacion.desc()).all()
 
     @staticmethod
-    def create(data: dict) -> Post:
+    def create(data: dict):
         """
         Crea y guarda un Post.
         data expected keys:
@@ -68,7 +68,6 @@ class PostRepository:
 
         db.session.add(nuevo_post)
         db.session.commit()
-        # refrescar por si hay defaults/autogenerados
         db.session.refresh(nuevo_post)
         return nuevo_post
 
@@ -87,14 +86,13 @@ class PostRepository:
         if "is_published" in data:
             post.is_published = data["is_published"]
 
-        # Manejo de categorías: si viene categoria_ids, reemplazamos las relaciones
+        # Manejo de categorias: si viene categoria_ids, reemplazamos las relaciones
         if "categoria_ids" in data:
             cat_ids = data.get("categoria_ids") or []
             if cat_ids:
                 categorias = Categoria.query.filter(Categoria.id.in_(cat_ids)).all()
                 post.categorias = categorias
             else:
-                # si lista vacía => limpiar categorías
                 post.categorias = []
 
         db.session.commit()
@@ -102,7 +100,7 @@ class PostRepository:
         return post
 
     @staticmethod
-    def delete(post: Post) -> None:
+    def delete(post: Post):
         """Elimina un post (borrado físico)."""
         db.session.delete(post)
         db.session.commit()
@@ -116,7 +114,7 @@ class PostRepository:
         return query.count()
 
     @staticmethod
-    def get_posts_last_week() -> List[Post]:
+    def get_posts_last_week():
         """Devuelve posts creados en la última semana."""
         since = datetime.utcnow() - timedelta(days=7)
         return Post.query.filter(Post.fecha_creacion >= since).order_by(Post.fecha_creacion.desc()).all()

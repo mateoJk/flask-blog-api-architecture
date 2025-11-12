@@ -2,7 +2,8 @@ from flask import request, jsonify
 from flask.views import MethodView
 from decorators.auth_decorators import roles_required, active_user_required, check_ownership_or_role
 from services.comment_service import CommentService
-from schemas.comment_schemas import CommentCreateSchema
+from schemas.comment_schemas import CommentCreateSchema, CommentSchema
+
 
 comment_service = CommentService()
 
@@ -13,7 +14,7 @@ class PostCommentsAPI(MethodView):
     def get(self, post_id):
         """Listar comentarios de un post (público)"""
         comments = comment_service.get_comments_by_post(post_id)
-        return jsonify([comment.to_dict() for comment in comments]), 200
+        return jsonify(CommentSchema(many=True).dump(comments)), 200
 
     @roles_required("user", "moderator", "admin")
     @active_user_required
@@ -27,7 +28,7 @@ class PostCommentsAPI(MethodView):
             return jsonify({"error": "Datos inválidos", "details": str(err)}), 400
 
         nuevo_comment = comment_service.create_comment(post_id, valid_data)
-        return jsonify(nuevo_comment.to_dict()), 201
+        return jsonify(CommentSchema().dump(nuevo_comment)), 201
 
 
 class CommentDeleteAPI(MethodView):

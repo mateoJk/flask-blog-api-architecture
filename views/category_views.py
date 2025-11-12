@@ -36,9 +36,9 @@ class CategoryDetailAPI(MethodView):
 
     @roles_required("moderator", "admin")
     @active_user_required
-    def put(self, category_id):
+    def put(self, cat_id):
         """Actualizar categoría (solo moderator o admin)"""
-        category = category_service.get_category_by_id(category_id)
+        category = category_service.get_category_by_id(cat_id)
         if not category:
             return jsonify({"error": "Categoría no encontrada"}), 404
 
@@ -54,9 +54,9 @@ class CategoryDetailAPI(MethodView):
 
     @roles_required("admin")
     @active_user_required
-    def delete(self, category_id):
+    def delete(self, cat_id):
         """Eliminar categoría (solo admin)"""
-        category = category_service.get_category_by_id(category_id)
+        category = category_service.get_category_by_id(cat_id)
         if not category:
             return jsonify({"error": "Categoría no encontrada"}), 404
 

@@ -9,14 +9,14 @@ comment_repo = CommentRepository()
 class CommentService:
     """Lógica de negocio para comentarios"""
 
-    def get_comments_by_post(self, post_id: int) -> List[Comentario]:
+    def get_comments_by_post(self, post_id: int):
         return comment_repo.get_by_post(post_id)
 
-    def get_comment_by_id(self, comment_id: int) -> Optional[Comentario]:
+    def get_comment_by_id(self, comment_id: int):
         return comment_repo.get_by_id(comment_id)
 
-    def create_comment(self, post_id: int, data: dict) -> Comentario:
+    def create_comment(self, post_id: int, data: dict):
         return comment_repo.create(post_id, data)
 
-    def delete_comment(self, comment: Comentario) -> None:
+    def delete_comment(self, comment: Comentario):
         comment_repo.delete(comment)
