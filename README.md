@@ -58,7 +58,9 @@ GET /api/stats                 # Moderator y admin
 
 
 # Credenciales de Prueba
-admin: {"email": "admin1@test.com", "password": "123456"}
-moderator: {"email": "user1@test.com", "password": "123456"}
-user: {"email": "user2@test.com", "password": "123455"}
+admin: "email": "admin1@test.com" / "password": "123456"
+#
+moderator: "email": "user1@test.com" / "password": "123456"
+#
+user: "email": "user2@test.com" / "password": "123455"
 
