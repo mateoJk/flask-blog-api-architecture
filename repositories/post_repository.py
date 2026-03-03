@@ -6,65 +6,75 @@ from models import Post, Categoria
 
 
 class PostRepository:
-    """Repository para operaciones CRUD sobre Post."""
+    """Repository para operaciones CRUD sobre Post con nivel de abstracción Senior."""
 
     @staticmethod
-    def get_all(published_only: bool = True, order_desc: bool = True):
+    def _get_or_create_categories(data: dict) -> List[Categoria]:
         """
-        Devuelve todos los posts.
-        - published_only: si True devuelve solo posts con is_published=True.
-        - order_desc: si True ordena por fecha_creacion desc.
+        Método privado para centralizar la lógica de categorías.
+        Evita la repetición de código (DRY).
         """
+        categorias = []
+
+        # Categorías existentes por ID
+        cat_ids = data.get("categoria_ids") or []
+        if cat_ids:
+            categorias_existentes = Categoria.query.filter(Categoria.id.in_(cat_ids)).all()
+            categorias.extend(categorias_existentes)
+
+        # Lógica para nueva categoría por texto
+        nueva_cat_nombre = data.get("nueva_categoria")
+        if nueva_cat_nombre and nueva_cat_nombre.strip():
+            nombre_limpio = nueva_cat_nombre.strip()
+            
+            # Búsqueda optimizada (Case-insensitive)
+            categoria_existente = Categoria.query.filter(
+                db.func.lower(Categoria.nombre) == nombre_limpio.lower()
+            ).first()
+
+            if categoria_existente:
+                if categoria_existente not in categorias:
+                    categorias.append(categoria_existente)
+            else:
+                nueva_categoria = Categoria(nombre=nombre_limpio)
+                db.session.add(nueva_categoria)
+                db.session.flush()  # Obtenemos el ID antes del commit
+                categorias.append(nueva_categoria)
+        
+        return categorias
+
+    @staticmethod
+    def get_all(published_only: bool = True, order_desc: bool = True) -> List[Post]:
         query = Post.query
         if published_only:
             query = query.filter_by(is_published=True)
-        if order_desc:
-            query = query.order_by(Post.fecha_creacion.desc())
-        else:
-            query = query.order_by(Post.fecha_creacion.asc())
-        return query.all()
+        
+        order_fn = Post.fecha_creacion.desc() if order_desc else Post.fecha_creacion.asc()
+        return query.order_by(order_fn).all()
 
     @staticmethod
-    def get_by_id(post_id: int):
-        """Devuelve un Post por su id o None si no existe."""
+    def get_by_id(post_id: int) -> Optional[Post]:
         return Post.query.get(post_id)
 
     @staticmethod
-    def get_by_user(user_id: int, published_only: bool = False):
-        """Devuelve posts escritos por un usuario."""
+    def get_by_user(user_id: int, published_only: bool = False) -> List[Post]:
         query = Post.query.filter_by(usuario_id=user_id)
         if published_only:
             query = query.filter_by(is_published=True)
         return query.order_by(Post.fecha_creacion.desc()).all()
 
     @staticmethod
-    def create(data: dict):
-        """
-        Crea y guarda un Post.
-        data expected keys:
-          - titulo (str)
-          - contenido (str)
-          - usuario_id (int)
-          - is_published (bool) optional
-          - categoria_ids (list[int]) optional
-        Retorna la instancia Post creada (no serializada).
-        """
-        categoria_objs = []
-        cat_ids = data.get("categoria_ids") or []
-        if cat_ids:
-            categoria_objs = Categoria.query.filter(Categoria.id.in_(cat_ids)).all()
-
+    def create(data: dict) -> Post:
+        """Crea un post utilizando la lógica centralizada de categorías."""
         nuevo_post = Post(
             titulo=data["titulo"],
             contenido=data["contenido"],
             usuario_id=data["usuario_id"],
             is_published=data.get("is_published", True)
         )
-
-        # Asociar categorías si existen
-        if categoria_objs:
-            for c in categoria_objs:
-                nuevo_post.categorias.append(c)
+        
+        # Usamos el método privado optimizado
+        nuevo_post.categorias = PostRepository._get_or_create_categories(data)
 
         db.session.add(nuevo_post)
         db.session.commit()
@@ -73,48 +83,35 @@ class PostRepository:
 
     @staticmethod
     def update(post: Post, data: dict) -> Post:
-        """
-        Actualiza un Post existente.
-        - post: instancia de Post ya cargada.
-        - data: dict con campos a actualizar (titulo, contenido, is_published, categoria_ids)
-        Devuelve la instancia actualizada.
-        """
-        if "titulo" in data and data["titulo"] is not None:
+        """Actualiza un post existente de forma segura."""
+        if "titulo" in data:
             post.titulo = data["titulo"]
-        if "contenido" in data and data["contenido"] is not None:
+        if "contenido" in data:
             post.contenido = data["contenido"]
         if "is_published" in data:
             post.is_published = data["is_published"]
 
-        # Manejo de categorias: si viene categoria_ids, reemplazamos las relaciones
-        if "categoria_ids" in data:
-            cat_ids = data.get("categoria_ids") or []
-            if cat_ids:
-                categorias = Categoria.query.filter(Categoria.id.in_(cat_ids)).all()
-                post.categorias = categorias
-            else:
-                post.categorias = []
+        # Actualizamos categorías solo si vienen en el data
+        if "categoria_ids" in data or "nueva_categoria" in data:
+            post.categorias = PostRepository._get_or_create_categories(data)
 
         db.session.commit()
         db.session.refresh(post)
         return post
 
     @staticmethod
-    def delete(post: Post):
-        """Elimina un post (borrado físico)."""
+    def delete(post: Post) -> None:
         db.session.delete(post)
         db.session.commit()
 
     @staticmethod
     def count_all(published_only: bool = True) -> int:
-        """Cuenta posts (útil para estadísticas)."""
         query = Post.query
         if published_only:
             query = query.filter_by(is_published=True)
         return query.count()
 
     @staticmethod
-    def get_posts_last_week():
-        """Devuelve posts creados en la última semana."""
+    def get_posts_last_week() -> List[Post]:
         since = datetime.utcnow() - timedelta(days=7)
         return Post.query.filter(Post.fecha_creacion >= since).order_by(Post.fecha_creacion.desc()).all()
