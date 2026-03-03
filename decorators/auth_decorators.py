@@ -61,12 +61,17 @@ def check_ownership_or_role(resource_owner_id):
         if not check_ownership_or_role(post.usuario_id):
             return jsonify({"error": "No tienes permiso"}), 403
     """
-    # identity: id que pasaste al crear el token (create_access_token(identity=..))
-    user_id = get_jwt_identity()
-    claims = get_jwt()
-    user_role = claims.get("role")
-
-    if user_role == "admin":
-        return True
-
-    return int(user_id) == resource_owner_id
+    try:
+        user_id = get_jwt_identity()
+        if user_id is None:
+            return False
+            
+        claims = get_jwt()
+        # Si es admin, tiene pase libre siempre
+        if claims.get("role") == "admin":
+            return True
+            
+        # Comparamos asegurando que ambos sean del mismo tipo (int)
+        return int(user_id) == int(resource_owner_id)
+    except (ValueError, TypeError):
+        return False
