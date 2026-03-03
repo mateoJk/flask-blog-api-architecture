@@ -7,61 +7,69 @@ source env/bin/activate  # Linux/Mac
 pip install -r requirements.txt  
 
 
-# Cómo ejecutar la app
-flask run
+# Professional Blog Engine API
 
+Una implementación de alto rendimiento para la gestión de contenidos, construida sobre **Flask** y estructurada bajo patrones de diseño empresariales. Este sistema prioriza el desacoplamiento, la integridad de los datos y un control de acceso granular basado en identidades.
 
-# Documentacion de endpoints
-# NOTA: Todos los endpoints que requieren autenticación deben recibir el token JWT en el header: Authorization: Bearer <token>
+---
 
-#### **Posts**
-```
-GET    /api/posts              # Público - listar todos los posts
-GET    /api/posts/<id>         # Público - ver un post específico
-POST   /api/posts              # Requiere autenticación (user+)
-PUT    /api/posts/<id>         # Solo el autor o admin
-DELETE /api/posts/<id>         # Solo el autor o admin
-```
+## 🏛️ Arquitectura de Software
 
-#### **Comentarios**
-```
-GET    /api/posts/<id>/comments      # Público
-POST   /api/posts/<id>/comments      # Requiere autenticación (user+)
-DELETE /api/comments/<id>            # Autor, moderator o admin
-```
+El sistema implementa una **Arquitectura Multi-Capa** diseñada para maximizar la mantenibilidad y facilitar la evolución del software sin efectos secundarios:
 
-#### **Categorías**
-```
-GET    /api/categories         # Público
-POST   /api/categories         # Solo moderator y admin
-PUT    /api/categories/<id>    # Solo moderator y admin
-DELETE /api/categories/<id>    # Solo admin
-```
+### 🔹 Patrón Repository (Persistence Layer)
+Abstracción total de la capa de datos mediante `PostRepository`. Este patrón garantiza que la lógica de negocio sea agnóstica al motor de persistencia, permitiendo migraciones de base de datos o cambios en el ORM con impacto cero en las capas superiores.
 
-#### **Usuarios (Admin)**
-```
-GET    /api/users              # Solo admin
-GET    /api/users/<id>         # Usuario mismo o admin
-PATCH  /api/users/<id>/role    # Solo admin (cambiar rol)
-DELETE /api/users/<id>         # Solo admin (desactivar)
-```
+### 🔹 Service Layer (Domain Logic)
+Centralización de las reglas de negocio en `PostService`. Esta capa actúa como el orquestador del dominio, gestionando la validación compleja, la integridad referencial y la verificación de permisos antes de cualquier mutación de estado.
 
-#### **Estadísticas**
-```
-GET /api/stats                 # Moderator y admin
-  Response: {
-    "total_posts": 45,
-    "total_comments": 120,
-    "total_users": 30,
-    "posts_last_week": 8  // solo admin
-  }
-```
+### 🔹 Interface Layer (MethodView & Marshmallow)
+Implementación de **Vistas Basadas en Clases (CBV)** para una gestión RESTful consistente. Se utilizan **Data Transfer Objects (DTOs)** vía Marshmallow para garantizar contratos de interfaz estrictos, saneamiento de entradas y serialización optimizada de salidas.
 
+---
 
-# Credenciales de Prueba
-admin: "email": "admin1@test.com" / "password": "123456"  
-moderator: "email": "user1@test.com" / "password": "123456"  
-user: "email": "user2@test.com" / "password": "123455"  
+## 🔐 Seguridad y Control de Acceso (RBAC)
+
+El sistema de seguridad está diseñado bajo el principio de **Privilegio Mínimo** y verificación criptográfica:
+
+* **Identidad**: Autenticación asíncrona mediante **JWT (JSON Web Tokens)** con inyección de identidad en el contexto de ejecución.
+* **Autorización Jerárquica**: Implementación de **Role-Based Access Control (RBAC)** que define capacidades granulares para roles de *Administrator*, *Moderator* y *Standard User*.
+* **Resource Ownership Verification**: Validación dinámica de propiedad para prevenir vulnerabilidades de referencia directa insegura a objetos (IDOR).
+
+---
+
+## 🛠️ Stack Tecnológico
+* **Backend**: Python 3.10+ | Flask
+* **Persistencia**: MySQL | SQLAlchemy (ORM)
+* **Seguridad**: Flask-JWT-Extended | Hashing BCrypt
+* **Esquemas & Validación**: Marshmallow
+* **Infraestructura de Datos**: Flask-Migrate (Alembic)
+
+---
+
+## 📋 Especificación de la Interfaz (Endpoints)
+
+| Recurso | Endpoint | Operación | Control de Acceso |
+| :--- | :--- | :--- | :--- |
+| **Identity** | `/api/login` | POST | Anonymous |
+| **Content** | `/api/posts` | GET/POST | Public / Authenticated |
+| **Content** | `/api/posts/<id>` | PUT/DELETE | Resource Owner / Admin |
+| **Engagement**| `/api/comments` | POST/DELETE | Authenticated / Mod+ |
+| **Governance**| `/api/users/role`| PATCH | Administrator |
+| **Analytics** | `/api/stats` | GET | Privileged Roles |
+
+---
+
+## ⚙️ Configuración del Entorno de Desarrollo
+
+💎 High-End Standards
+Type Hinting: Uso extensivo de tipado estático para robustez del código y análisis estático.
+
+DRY & Modularidad: Refactorización de componentes comunes en servicios privados y decoradores reutilizables.
+
+Global Error Handling: Gestión centralizada de excepciones para garantizar respuestas JSON normalizadas bajo cualquier escenario de falla.
+
+Relational Integrity: Gestión avanzada de relaciones Many-to-Many para la categorización dinámica de contenido.
 
 
 
