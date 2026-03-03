@@ -30,7 +30,9 @@ class AuthRegisterView(MethodView):
         db.session.add(nuevo_usuario)
         db.session.flush()  # obtener ID antes de commit
 
-        credenciales = UserCredentials(usuario_id=nuevo_usuario.id)
+        credenciales = UserCredentials(usuario_id=nuevo_usuario.id,
+            role=valid_data.get("role", "user")  # por defecto user
+        )
         credenciales.set_password(valid_data["password"])
 
         db.session.add(credenciales)

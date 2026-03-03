@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-
+from flask_cors import CORS
 # Instanciamos extensiones
 db = SQLAlchemy()
 migrate = Migrate()
@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'cualquiercosa')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
-
+CORS(app)
 # Inicializar extensiones
 db.init_app(app)
 migrate.init_app(app, db)
