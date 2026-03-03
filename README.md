@@ -38,16 +38,20 @@ El sistema de seguridad está diseñado bajo el principio de **Privilegio Mínim
 
 ---
 
-## 📋 Especificación de la Interfaz (Endpoints)
+## 📋 Especificación de la Interfaz (API Reference)
 
-| Recurso | Endpoint | Operación | Control de Acceso |
-| :--- | :--- | :--- | :--- |
-| **Identity** | `/api/login` | POST | Anonymous |
-| **Content** | `/api/posts` | GET/POST | Public / Authenticated |
-| **Content** | `/api/posts/<id>` | PUT/DELETE | Resource Owner / Admin |
-| **Engagement**| `/api/comments` | POST/DELETE | Authenticated / Mod+ |
-| **Governance**| `/api/users/role`| PATCH | Administrator |
-| **Analytics** | `/api/stats` | GET | Privileged Roles |
+Esta API sigue los estándares RESTful, utilizando códigos de estado HTTP semánticos y una matriz de permisos basada en identidades.
+
+| Dominio | Endpoint | Operación | Control de Acceso | Definición Técnica |
+| :--- | :--- | :--- | :--- | :--- |
+| **Identity** | `/api/register`, `/api/login` | POST | Anonymous | Gestión de identidades y emisión de JWT |
+| **Content** | `/api/posts` | GET, POST | Public / Auth | CRUD de recursos e inyección de autoría |
+| **Content** | `/api/posts/<id>` | GET, PUT, DELETE | Public / Owner+ | Validación de propiedad y roles administrativos |
+| **Engagement**| `/api/posts/<id>/comments` | GET, POST | Public / Auth | Capa de interacción social y persistencia |
+| **Engagement**| `/api/comments/<id>` | DELETE | Owner, Mod+ | Moderación jerárquica de contenido |
+| **Taxonomy** | `/api/categories` | GET, POST, PUT | Public / Mod+ | Clasificación y categorización de datos |
+| **Governance**| `/api/users` | GET, PATCH, DELETE | Admin | Ciclo de vida de usuarios y gestión de RBAC |
+| **Analytics** | `/api/stats` | GET | Privileged | Agregación de métricas y datos del sistema |
 
 ---
 
