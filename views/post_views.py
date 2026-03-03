@@ -1,14 +1,14 @@
 from flask import request, jsonify
 from flask.views import MethodView
+from marshmallow import ValidationError
+from flask_jwt_extended import get_jwt_identity
 
 from services.post_service import PostService
 from schemas.post_schemas import PostCreateSchema, PostUpdateSchema, PostSchema
-from decorators.auth_decorators import roles_required, active_user_required, check_ownership_or_role
+from decorators.auth_decorators import roles_required, active_user_required
 
-from flask_jwt_extended import get_jwt_identity
-
+# Instanciamos el servicio
 post_service = PostService()
-
 
 class PostsAPI(MethodView):
     """Endpoints para /api/posts"""
@@ -16,26 +16,27 @@ class PostsAPI(MethodView):
     def get(self):
         """Listar todos los posts públicos"""
         posts = post_service.get_public_posts()
-        schema = PostSchema(many=True)
-        return jsonify(schema.dump(posts)), 200
+        return jsonify(PostSchema(many=True).dump(posts)), 200
 
     @roles_required("user", "moderator", "admin")
     @active_user_required
     def post(self):
         """Crear un nuevo post"""
-        data = request.get_json()
-        schema = PostCreateSchema()
         try:
-            valid_data = schema.load(data)
-        except Exception as err:
-            return jsonify({"error": "Datos inválidos", "details": str(err)}), 400
-        
-        # Obtener el usuario actual desde JWT
-        usuario_id = get_jwt_identity()
-        valid_data["usuario_id"] = usuario_id  # agregar al diccionario
+            # Validación con Marshmallow
+            data = request.get_json()
+            valid_data = PostCreateSchema().load(data)
+            
+            # El usuario_id se inyecta desde el JWT por seguridad
+            valid_data["usuario_id"] = get_jwt_identity()
 
-        nuevo_post = post_service.create_post(valid_data)
-        return jsonify(PostSchema().dump(nuevo_post)), 201
+            nuevo_post = post_service.create_post(valid_data)
+            return jsonify(PostSchema().dump(nuevo_post)), 201
+            
+        except ValidationError as err:
+            return jsonify({"error": "Datos inválidos", "messages": err.messages}), 400
+        except Exception as e:
+            return jsonify({"error": "Error interno del servidor", "message": str(e)}), 500
 
 
 class PostDetailAPI(MethodView):
@@ -48,41 +49,39 @@ class PostDetailAPI(MethodView):
             return jsonify({"error": "Post no encontrado"}), 404
         return jsonify(PostSchema().dump(post)), 200
 
-
     @roles_required("user", "moderator", "admin")
     @active_user_required
     def put(self, post_id):
-        """Actualizar un post (solo autor o admin)"""
+        """Actualizar un post (la seguridad la maneja el Service)"""
         post = post_service.get_post_by_id(post_id)
         if not post:
             return jsonify({"error": "Post no encontrado"}), 404
 
-        # Verificar que el usuario sea el autor o admin
-        if not check_ownership_or_role(post.usuario_id):
-            return jsonify({"error": "No tienes permiso para actualizar este post."}), 403
-
-        data = request.get_json()
-        schema = PostUpdateSchema()
         try:
-            valid_data = schema.load(data)
-        except Exception as err:
-            return jsonify({"error": "Datos inválidos", "details": str(err)}), 400
+            data = request.get_json()
+            valid_data = PostUpdateSchema().load(data)
 
-        actualizado = post_service.update_post(post, valid_data)
-        return jsonify(PostSchema().dump(actualizado)), 200
+            # Delevamos la responsabilidad de verificar propiedad al Service
+            actualizado = post_service.update_post(post, valid_data)
+            return jsonify(PostSchema().dump(actualizado)), 200
+            
+        except ValidationError as err:
+            return jsonify({"error": "Datos inválidos", "messages": err.messages}), 400
+        except PermissionError as err:
+            return jsonify({"error": "Acceso denegado", "message": str(err)}), 403
 
-    #delete
     @roles_required("user", "moderator", "admin")
     @active_user_required
     def delete(self, post_id):
-        """Eliminar un post (solo autor o admin)"""
+        """Eliminar un post (la seguridad la maneja el Service)"""
         post = post_service.get_post_by_id(post_id)
         if not post:
             return jsonify({"error": "Post no encontrado"}), 404
 
-        # Verificar que el usuario sea el autor o admin
-        if not check_ownership_or_role(post.usuario_id):
-            return jsonify({"error": "No tienes permiso para eliminar este post."}), 403
-
-        post_service.delete_post(post)
-        return jsonify({"message": "Post eliminado correctamente"}), 200
+        try:
+            # El Service lanzará PermissionError si no es el dueño o admin
+            post_service.delete_post(post)
+            return jsonify({"message": "Post eliminado correctamente"}), 200
+            
+        except PermissionError as err:
+            return jsonify({"error": "Acceso denegado", "message": str(err)}), 403
