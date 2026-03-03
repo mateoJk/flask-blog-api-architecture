@@ -1,12 +1,3 @@
-# Preparacion e instalación
-git clone <https://github.com/mateoJk/flask-blog-api-architecture>  
-cd <flask-blog-api-architecture>  
-python -m venv env  
-source env/bin/activate  # Linux/Mac  
-.\env\Scripts\Activate.ps1  # Windows PowerShell  
-pip install -r requirements.txt  
-
-
 # Professional Blog Engine API
 
 Una implementación de alto rendimiento para la gestión de contenidos, construida sobre **Flask** y estructurada bajo patrones de diseño empresariales. Este sistema prioriza el desacoplamiento, la integridad de los datos y un control de acceso granular basado en identidades.
@@ -60,17 +51,29 @@ El sistema de seguridad está diseñado bajo el principio de **Privilegio Mínim
 
 ---
 
+## 💎 High-End Standards
+
+* **Type Hinting**: Uso extensivo de tipado estático para robustez del código y análisis estático.
+* **DRY & Modularidad**: Refactorización de componentes comunes en servicios privados y decoradores reutilizables.
+* **Global Error Handling**: Gestión centralizada de excepciones para garantizar respuestas JSON normalizadas bajo cualquier escenario de falla.
+* **Relational Integrity**: Gestión avanzada de relaciones Many-to-Many para la categorización dinámica de contenido.
+
+---
+
 ## ⚙️ Configuración del Entorno de Desarrollo
 
-💎 High-End Standards
-Type Hinting: Uso extensivo de tipado estático para robustez del código y análisis estático.
+```bash
+# Clonar repositorio e ingresar
+git clone [https://github.com/mateoJk/flask-blog-api-architecture](https://github.com/mateoJk/flask-blog-api-architecture)
+cd flask-blog-api-architecture
 
-DRY & Modularidad: Refactorización de componentes comunes en servicios privados y decoradores reutilizables.
+# Entorno Virtual
+python -m venv env
+source env/bin/activate  # Linux / Mac
+.\env\Scripts\Activate.ps1  # Windows PowerShell
 
-Global Error Handling: Gestión centralizada de excepciones para garantizar respuestas JSON normalizadas bajo cualquier escenario de falla.
+# Instalación de dependencias
+pip install -r requirements.txt
 
-Relational Integrity: Gestión avanzada de relaciones Many-to-Many para la categorización dinámica de contenido.
-
-
-
-
+# Inicialización de la aplicación
+flask run
