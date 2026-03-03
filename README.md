@@ -1,6 +1,6 @@
 # Preparacion e instalación
-git clone <https://github.com/mateoJk/efi_segundo_semestre>  
-cd <efi_segundo_semestre>  
+git clone <https://github.com/mateoJk/flask-blog-api-architecture>  
+cd <flask-blog-api-architecture>  
 python -m venv env  
 source env/bin/activate  # Linux/Mac  
 .\env\Scripts\Activate.ps1  # Windows PowerShell  
