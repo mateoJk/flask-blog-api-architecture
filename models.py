@@ -39,14 +39,14 @@ class UserCredentials(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default="user") 
 
-    def set_password(self, password):
+    def set_password(self, password: str) -> None:
         """Guarda la contraseña encriptada"""
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
+    def check_password(self, password: str) -> bool:
         """Verifica si la contraseña ingresada es correcta"""
         return check_password_hash(self.password_hash, password)
 
@@ -67,7 +67,12 @@ class Post(db.Model):
 
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
 
-    comentarios = db.relationship('Comentario', backref='post', lazy=True)
+    comentarios = db.relationship(
+    'Comentario',
+    backref='post',
+    lazy=True,
+    cascade='all, delete-orphan'
+)
     categorias = db.relationship(
         'Categoria',
         secondary=post_categoria,
