@@ -7,7 +7,7 @@ class UserService:
     """Lógica de negocio para usuarios"""
 
     def get_all_users(self) -> List[Usuario]:
-        return Usuario.query.order_by(Usuario.username.asc()).all()
+        return Usuario.query.filter_by(is_active=True).order_by(Usuario.username.asc()).all()
 
     def get_user_by_id(self, user_id: int):
         return Usuario.query.get(user_id)
@@ -39,5 +39,4 @@ class UserService:
 
         user.is_active = False
         db.session.commit()
-        db.session.refresh(user)
         return user

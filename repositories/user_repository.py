@@ -7,8 +7,8 @@ class UserRepository:
 
     @staticmethod
     def get_all():
-        """Devuelve todos los usuarios activos e inactivos."""
-        return Usuario.query.order_by(Usuario.username.asc()).all()
+        """Devuelve unicamente los usuarios activos."""
+        return Usuario.query.filter_by(is_active=True).order_by(Usuario.username.asc()).all()
 
     @staticmethod
     def get_by_id(user_id: int):
