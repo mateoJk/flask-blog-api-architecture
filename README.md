@@ -1,5 +1,11 @@
 # Professional Blog Engine API
 
+[![Python](https://img.shields.io/badge/Language-Python%203.10+-3776AB?style=flat-square&logo=python)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Framework-Flask-000000?style=flat-square&logo=flask)](https://flask.palletsprojects.com/)
+[![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?style=flat-square&logo=mysql)](https://www.mysql.com/)
+[![JWT](https://img.shields.io/badge/Security-JWT-000000?style=flat-square&logo=json-web-tokens)](https://jwt.io/)
+[![Frontend](https://img.shields.io/badge/Ecosystem-React%2018-61DAFB?style=flat-square&logo=react)](https://github.com/mateoJk/miniblog-frontend-architecture)
+
 Una implementación de alto rendimiento para la gestión de contenidos, construida sobre **Flask** y estructurada bajo patrones de diseño empresariales. Este sistema prioriza el desacoplamiento, la integridad de los datos y un control de acceso granular basado en identidades.
 
 ---
@@ -81,3 +87,4 @@ pip install -r requirements.txt
 
 # Inicialización de la aplicación
 flask run
+```
