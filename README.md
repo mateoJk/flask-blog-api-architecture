@@ -74,7 +74,7 @@ Esta API sigue los estándares RESTful, utilizando códigos de estado HTTP semá
 
 ```bash
 # Clonar repositorio e ingresar
-git clone [https://github.com/mateoJk/flask-blog-api-architecture](https://github.com/mateoJk/flask-blog-api-architecture)
+git clone https://github.com/mateoJk/flask-blog-api-architecture
 cd flask-blog-api-architecture
 
 # Entorno Virtual
